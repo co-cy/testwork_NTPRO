@@ -3,6 +3,8 @@
 //
 
 #include "Client.h"
+#include "Request/Request.h"
+#include "Response/Response.h"
 
 int main() {
   try {
@@ -17,12 +19,54 @@ int main() {
 
     while (true) {
       // Тут реализовано "бесконечное" меню.
-      std::cout << "Message: ";
-      std::string message;
+      std::cout << "Menu:\n"
+                   "1) Registration\n"
+                   "2) Auth\n"
+                   "3) Exit\n"
+                << std::endl;
 
-      std::cin >> message;
-      SendMessage(s, message);
-      std::cout << ReadMessage(s) << std::endl;
+      short menu_option_num;
+      std::cin >> menu_option_num;
+      if (menu_option_num == 1) {
+        std::string login;
+        std::string password;
+
+        std::cin >> login >> password;
+
+        SendMessage(s, Request::Registration(login, password));
+        auto stream = ReadMessage(s);
+
+        char type_answer;
+        stream >> type_answer;
+        if (type_answer == Response::TypeBoolMessage) {
+          Response::BoolMessage response(stream);
+          std::cout << "Registration result: " << response.state << "\nMessage: " << response.message;
+        } else {
+          std::cout << "Bad type answer: " << int(type_answer);
+        }
+      } else if (menu_option_num == 2) {
+        std::string login;
+        std::string password;
+
+        std::cin >> login >> password;
+
+        SendMessage(s, Request::Auth(login, password));
+        auto stream = ReadMessage(s);
+
+        char type_answer;
+        stream >> type_answer;
+        if (type_answer == Response::TypeBoolMessage) {
+          Response::BoolMessage response(stream);
+          std::cout << "Auth result: " << response.state << "\nMessage: " << response.message;
+        } else {
+          std::cout << "Bad type answer: " << int(type_answer);
+        }
+      } else if (menu_option_num == 3) {
+        exit(0);
+      } else {
+        std::cout << "Unknown menu option\n" << std::endl;
+        break;
+      }
     }
   }
   catch (std::exception &e) {

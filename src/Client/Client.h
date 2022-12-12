@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <boost/asio.hpp>
+#include <sstream>
 
 #include "Common.h"
 
@@ -18,6 +19,6 @@ void SendMessage(
     const std::string &message);
 
 // Возвращает строку с ответом сервера на последний запрос.
-std::string ReadMessage(tcp::socket &aSocket);
+std::istringstream ReadMessage(tcp::socket &aSocket);
 
 #endif //TESTWORK_NTPRO_SRC_CLIENT_CLIENT_H_

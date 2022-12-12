@@ -1,5 +1,6 @@
 #include "Client.h"
 
+
 // Отправка сообщения на сервер по шаблону.
 void SendMessage(
     tcp::socket &aSocket,
@@ -8,11 +9,11 @@ void SendMessage(
 }
 
 // Возвращает строку с ответом сервера на последний запрос.
-std::string ReadMessage(tcp::socket &aSocket) {
+std::istringstream ReadMessage(tcp::socket &aSocket) {
   boost::asio::streambuf b;
   boost::asio::read_until(aSocket, b, "\0");
   std::istream is(&b);
   std::string line(std::istreambuf_iterator<char>(is), {});
-  return line;
+  return std::istringstream(line);
 }
 
