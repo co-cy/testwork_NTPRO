@@ -7,12 +7,16 @@
 static short port = 5555;
 
 struct User {
-  size_t userID;
+  size_t user_id;
   std::string login;
   std::string password;
 
-  User() : userID(0) {};
-  User(size_t userID, std::string &login, std::string &password) : userID(userID), login(login), password(password) {}
+  double balance_rub;
+  double balance_usd;
+
+  User() : user_id(0), balance_rub(0), balance_usd(0) {};
+  User(size_t userID, std::string &login, std::string &password)
+      : user_id(userID), login(login), password(password), balance_rub(0), balance_usd(0) {}
 
   explicit operator std::string() const {
     return "USER(login: '" + login + "', password: '" + password + "')";
@@ -36,19 +40,11 @@ class UserBase {
     return true;
   }
 
-  [[nodiscard]] User get_user(size_t user_id) const {
-    auto iter = id_login.find(user_id);
-    if (iter == id_login.end())
-      return {};
-    else
-      return login_user.find(iter->second)->second;
+  [[nodiscard]] User &get_user(size_t user_id) {
+    return login_user[id_login[user_id]];
   }
-  [[nodiscard]] User get_user(std::string &login) const {
-    auto iter = login_user.find(login);
-    if (iter == login_user.end())
-      return {};
-    else
-      return iter->second;
+  [[nodiscard]] User &get_user(std::string &login) {
+    return login_user[login];
   }
   [[nodiscard]] bool find(std::string &login) const {
     return login_user.find(login) != login_user.end();
@@ -57,5 +53,7 @@ class UserBase {
     return id_login.find(user_id) != id_login.end();
   }
 };
+
+static UserBase database{};
 
 #endif //CLIENSERVERECN_COMMON_HPP

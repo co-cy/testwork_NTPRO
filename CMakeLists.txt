@@ -11,9 +11,6 @@ set(shared_files
         src/Common.h
         )
 
-add_executable(Test
-        src/main.cpp src/Order.h)
-
 add_executable(Client
         ${shared_files}
         src/Client/Client.cpp src/Client/Client.h src/Client/main.cpp)
