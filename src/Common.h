@@ -30,14 +30,14 @@ class UserBase {
  public:
   UserBase() = default;
 
-  bool append(std::string &login, std::string &password) {
+  size_t append(std::string &login, std::string &password) {
     if (login_user.find(login) != login_user.end())
-      return false;
-    size_t new_user_id = login_user.size();
+      return 0;
+    size_t new_user_id = login_user.size() + 1;
 
     id_login[new_user_id] = login;
     login_user[login] = User(new_user_id, login, password);
-    return true;
+    return new_user_id;
   }
 
   [[nodiscard]] User &get_user(size_t user_id) {

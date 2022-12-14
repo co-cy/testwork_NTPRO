@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <queue>
 #include <vector>
+#include <set>
 
 #include "Common.h"
 
@@ -44,7 +45,6 @@ struct Order {
   bool operator>=(const Order &other) const noexcept {
     return price >= other.price;
   }
-
   Order operator-(const Order &other) const {
     User &this_user = database.get_user(user_id);
     this_user.balance_rub += static_cast<double>(other.count) * price;
@@ -59,6 +59,10 @@ struct Order {
     } else {
       return {user_id, 0, 0};
     }
+  }
+
+  [[nodiscard]] bool empty() const noexcept {
+    return count;
   }
 };
 

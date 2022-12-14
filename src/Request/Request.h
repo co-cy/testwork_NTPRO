@@ -8,42 +8,61 @@
 #include <string>
 #include <sstream>
 #include "Common.h"
+#include "Order.h"
 
 namespace Request {
 
 enum TypeRequest : char {
   TypeRegistration = 1,
   TypeAuth,
-
+  TypeCreateOrder,
 };
 
 struct Registration {
-  User user;
+  std::string login;
+  std::string password;
 
-  Registration(std::string login, std::string password) : user(login, password) {}
-  explicit Registration(User &user) : user(user) {}
+  Registration(std::string &login, std::string &password) : login(login), password(password) {}
 
   explicit Registration(std::istringstream &stream) {
-    stream >> user.login >> user.password;
+    stream >> login >> password;
   }
 
   operator std::string() const {
-    return std::string(1, TypeRegistration) + " " + user.login + " " + user.password;
+    return std::string(1, TypeRegistration) + " " + login + " " + password;
   }
 };
 
 struct Auth {
-  User user;
+  std::string login;
+  std::string password;
 
-  Auth(std::string login, std::string password) : user(login, password) {}
-  explicit Auth(User &user) : user(user) {}
+  Auth(std::string &login, std::string &password) : login(login), password(password) {}
 
   explicit Auth(std::istringstream &stream) {
-    stream >> user.login >> user.password;
+    stream >> login >> password;
   }
 
   operator std::string() const {
-    return std::string(1, TypeAuth) + " " + user.login + " " + user.password;
+    return std::string(1, TypeAuth) + " " + login + " " + password;
+  }
+};
+
+struct CreateOrder {
+  bool is_buy;
+  Order order;
+
+  CreateOrder(size_t userID, std::size_t count, double price) : is_buy(true), order(userID, count, price) {}
+  CreateOrder(bool is_buy, size_t userID, std::size_t count, double price)
+      : is_buy(is_buy), order(userID, count, price) {}
+  explicit CreateOrder(std::istringstream &stream) : is_buy(true) {
+    stream >> is_buy >> order.user_id >> order.count >> order.price;
+  }
+
+  operator std::string() const {
+    return std::string(1, TypeCreateOrder) + " " + std::to_string(is_buy) + " " + std::to_string(order.user_id) + " "
+        + std::to_string(order.count) + " "
+        + std::to_string(order.count);
   }
 };
 

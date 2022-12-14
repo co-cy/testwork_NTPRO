@@ -2,7 +2,7 @@
 #include <iostream>
 #include <boost/bind/bind.hpp>
 #include <boost/asio.hpp>
-#include <queue>
+#include <set>
 
 #include "Response/Response.h"
 #include "Request/Request.h"
@@ -11,10 +11,6 @@
 #include "Order.h"
 
 using boost::asio::ip::tcp;
-
-std::priority_queue<Order, std::vector<Order>, std::greater<>> sell_orders{};
-std::priority_queue<Order> buy_orders{};
-UserBase database{};
 
 void Session::start() {
   socket_.async_read_some(boost::asio::buffer(data_, max_length),
@@ -31,39 +27,45 @@ void Session::handle_read(const boost::system::error_code &error, size_t bytes_t
   }
 
   data_[bytes_transferred] = '\0';
-  std::cout << "Data command: " << data_ << "\n";
   std::istringstream iss(data_);
 
   char type_command;
   iss >> type_command;
-  std::cout << "Type command: " << int(type_command) << "\n";
 
-  Response::BoolMessage response(true);
-  std::string message;
+  Response::BoolMessage response(false);
 
   if (type_command == Request::TypeRegistration) {
+    // Go to registration handler
     Request::Registration reg_message{iss};
-    if (database.find(reg_message.user.login)) {
-      message = "Login already used";
-      response.state = false;
+    if (database.find(reg_message.login)) {
+      response.message = "Login already used";
     } else {
-      database.append(reg_message.user);
-      message = "Registration:\n" + std::string(reg_message.user) + "\n";
+      size_t user_id = database.append(reg_message.login, reg_message.password);
+
+      response.message = std::to_string(user_id);
+      response.state = true;
     }
   } else if (type_command == Request::TypeAuth) {
+    // Go to auth handler
     Request::Auth auth_message{iss};
-    if (!database.find(auth_message.user)) {
-      message = "Login or password bad";
-      response.state = false;
+    if (!database.find(auth_message.login)) {
+      response.message = "Login or password bad";
     } else {
-      message = "Auth\n" + std::string(auth_message.user) + "\n";
+      User &user = database.get_user(auth_message.login);
+
+      if (user.password != auth_message.password) {
+        response.message = "Login or password bad";
+      } else {
+        response.message = "Auth\n" + std::to_string(user.user_id);
+        response.state = true;
+      }
     }
+  } else {
+    // Go to 404 handler
+    response.message = "Endpoint not found";
   }
 
-  std::cout << message;
-
-  response.message = std::move(message);
-  message = std::string(response);
+  std::string message = std::string(response);
 
   boost::asio::async_write(socket_,
                            boost::asio::buffer(message, message.size()),
