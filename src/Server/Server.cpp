@@ -6,6 +6,7 @@
 
 #include "Response/Response.h"
 #include "Request/Request.h"
+#include "UserBase.h"
 #include "Common.h"
 #include "Server.h"
 #include "Order.h"

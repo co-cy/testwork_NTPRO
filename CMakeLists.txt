@@ -9,7 +9,7 @@ set(shared_files
         src/Request/Request.h
         src/Response/Response.h
         src/Common.h
-        )
+        src/User.h)
 
 add_executable(Client
         ${shared_files}
@@ -17,4 +17,4 @@ add_executable(Client
 
 add_executable(Server
         ${shared_files}
-        src/Server/Server.cpp src/Server/Server.h src/Server/main.cpp)
+        src/Server/Server.cpp src/Server/Server.h src/Server/main.cpp src/UserBase.h)
