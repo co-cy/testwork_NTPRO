@@ -7,37 +7,54 @@
 static short port = 5555;
 
 struct User {
+  size_t userID;
   std::string login;
   std::string password;
 
-  User() = default;
-  User(std::string login, std::string password) : login(login), password(password) {}
+  User() : userID(0) {};
+  User(size_t userID, std::string &login, std::string &password) : userID(userID), login(login), password(password) {}
 
-  operator std::string() const {
+  explicit operator std::string() const {
     return "USER(login: '" + login + "', password: '" + password + "')";
   }
 };
 
 class UserBase {
-  std::map<std::string, std::string> database{};
+  std::map<size_t, std::string> id_login;
+  std::map<std::string, User> login_user;
 
  public:
   UserBase() = default;
 
-  bool append(User &new_user) {
-    if (database.find(new_user.login) == database.end()) {
-      database[new_user.login] = new_user.password;
-      return true;
-    }
-    return false;
+  bool append(std::string &login, std::string &password) {
+    if (login_user.find(login) != login_user.end())
+      return false;
+    size_t new_user_id = login_user.size();
+
+    id_login[new_user_id] = login;
+    login_user[login] = User(new_user_id, login, password);
+    return true;
   }
 
-  [[nodiscard]] bool find(std::string login) const {
-    return database.find(login) != database.end();
+  [[nodiscard]] User get_user(size_t user_id) const {
+    auto iter = id_login.find(user_id);
+    if (iter == id_login.end())
+      return {};
+    else
+      return login_user.find(iter->second)->second;
   }
-  [[nodiscard]] bool find(User &user) const {
-    auto iter = database.find(user.login);
-    return iter != database.end() && iter->second == user.password;
+  [[nodiscard]] User get_user(std::string &login) const {
+    auto iter = login_user.find(login);
+    if (iter == login_user.end())
+      return {};
+    else
+      return iter->second;
+  }
+  [[nodiscard]] bool find(std::string &login) const {
+    return login_user.find(login) != login_user.end();
+  }
+  [[nodiscard]] bool find(size_t user_id) const {
+    return id_login.find(user_id) != id_login.end();
   }
 };
 
