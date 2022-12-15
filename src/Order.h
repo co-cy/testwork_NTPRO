@@ -74,7 +74,7 @@ struct Order {
   }
 
   [[nodiscard]] bool empty() const noexcept {
-    return count;
+    return !count;
   }
 };
 

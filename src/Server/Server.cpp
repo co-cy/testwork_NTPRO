@@ -30,14 +30,30 @@ void Session::handle_read(const boost::system::error_code &error, size_t bytes_t
   data_[bytes_transferred] = '\0';
   std::istringstream iss(data_);
 
+  std::cout << "Get data: _" << data_ << "_\n";
+
   char type_command;
   iss >> type_command;
 
-  Response::BoolMessage response(false);
+  std::cout << "Sell size: " << sell_orders.size() << "\n";
+  for (const auto &sell_order : sell_orders) {
+    std::cout << "Sell order: " << std::to_string(sell_order.user_id) << " " << std::to_string(sell_order.count) << " "
+              << std::to_string(sell_order.price) << " " << "\n";
+  }
+
+  std::cout << "Buy size: " << buy_orders.size() << "\n";
+  for (const auto &buy_order : buy_orders) {
+    std::cout << "Buy order: " << std::to_string(buy_order.user_id) << " " << std::to_string(buy_order.count) << " "
+              << std::to_string(buy_order.price) << " " << "\n";
+  }
+
+  std::string answer = std::to_string(Response::TypeInvalid);
 
   if (type_command == Request::TypeRegistration) {
     // Go to registration handler
+    Response::BoolMessage response(false);
     Request::Registration reg_message{iss};
+
     if (database.find(reg_message.login)) {
       response.message = "Login already used";
     } else {
@@ -46,9 +62,13 @@ void Session::handle_read(const boost::system::error_code &error, size_t bytes_t
       response.message = std::to_string(user_id);
       response.state = true;
     }
+
+    answer = response;
   } else if (type_command == Request::TypeAuth) {
     // Go to auth handler
+    Response::BoolMessage response(false);
     Request::Auth auth_message{iss};
+
     if (!database.find(auth_message.login)) {
       response.message = "Login or password bad";
     } else {
@@ -61,8 +81,12 @@ void Session::handle_read(const boost::system::error_code &error, size_t bytes_t
         response.state = true;
       }
     }
+
+    answer = response;
   } else if (type_command == Request::TypeCreateOrder) {
+    Response::BoolMessage response(false);
     Request::CreateOrder order{iss};
+
     if (order.is_buy) {
       for (auto iter = sell_orders.begin(); iter != sell_orders.end() && !order.order.empty();) {
         if (iter->user_id != order.order.user_id) {
@@ -103,15 +127,20 @@ void Session::handle_read(const boost::system::error_code &error, size_t bytes_t
 
     response.state = true;
     response.message = "Good";
-  } else {
-    // Go to 404 handler
-    response.message = "Endpoint not found";
+    answer = response;
+  } else if (type_command == Request::TypeInfoUser) {
+    Request::InfoUser info{iss};
+    if (database.find(info.user_id)) {
+      answer = Response::InfoUser(database.get_user(info.user_id));
+    } else {
+      answer = Response::BoolMessage(false, "User not found!");
+    }
+  } else if (type_command == Request::TypeSellerOrders) {
+  } else if (type_command == Request::TypeBuyOrders) {
   }
 
-  std::string message = std::string(response);
-
   boost::asio::async_write(socket_,
-                           boost::asio::buffer(message, message.size()),
+                           boost::asio::buffer(answer, answer.size()),
                            boost::bind(&Session::handle_write, this,
                                        boost::asio::placeholders::error));
 }

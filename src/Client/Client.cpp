@@ -5,6 +5,7 @@
 void SendMessage(
     tcp::socket &aSocket,
     const std::string &message) {
+  std::cout << "Send message: _" << message << "_\n";
   boost::asio::write(aSocket, boost::asio::buffer(message, message.size()));
 }
 
