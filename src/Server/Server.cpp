@@ -57,10 +57,52 @@ void Session::handle_read(const boost::system::error_code &error, size_t bytes_t
       if (user.password != auth_message.password) {
         response.message = "Login or password bad";
       } else {
-        response.message = "Auth\n" + std::to_string(user.user_id);
+        response.message = std::to_string(user.user_id);
         response.state = true;
       }
     }
+  } else if (type_command == Request::TypeCreateOrder) {
+    Request::CreateOrder order{iss};
+    if (order.is_buy) {
+      for (auto iter = sell_orders.begin(); iter != sell_orders.end() && !order.order.empty();) {
+        if (iter->user_id != order.order.user_id) {
+          if (*iter > order.order) {
+            auto half_order = sell_orders.extract(iter).value();
+            half_order.sub(order.order, order.is_buy);
+            sell_orders.insert(half_order);
+          } else {
+            order.order.sub(*iter, !order.is_buy);
+            iter = sell_orders.erase(iter);
+            continue;
+          }
+        }
+        ++iter;
+      }
+
+      if (!order.order.empty())
+        buy_orders.insert(order.order);
+    } else {
+      for (auto iter = buy_orders.begin(); iter != buy_orders.end() && !order.order.empty();) {
+        if (iter->user_id != order.order.user_id) {
+          if (*iter > order.order) {
+            auto half_order = buy_orders.extract(iter).value();
+            half_order.sub(order.order, order.is_buy);
+            buy_orders.insert(half_order);
+          } else {
+            order.order.sub(*iter, !order.is_buy);
+            iter = buy_orders.erase(iter);
+            continue;
+          }
+        }
+        ++iter;
+      }
+
+      if (!order.order.empty())
+        sell_orders.insert(order.order);
+    }
+
+    response.state = true;
+    response.message = "Good";
   } else {
     // Go to 404 handler
     response.message = "Endpoint not found";

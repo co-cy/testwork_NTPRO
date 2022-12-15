@@ -11,6 +11,7 @@
 namespace Response {
 
 enum TypeRequest : char {
+  TypeInvalid = 0,
   TypeBoolMessage = 1,
 
 };
@@ -20,7 +21,7 @@ struct BoolMessage {
   std::string message;
 
   explicit BoolMessage(bool state) : state(state) {};
-  BoolMessage(bool state, std::string comment) : state(state), message(comment) {};
+  BoolMessage(bool state, std::string &comment) : state(state), message(comment) {};
   explicit BoolMessage(std::istringstream &stream) : state() {
     stream >> state;
     getline(stream, message, '\0');

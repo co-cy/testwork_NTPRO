@@ -10,7 +10,9 @@
 #include <vector>
 #include <set>
 
+#include "UserBase.h"
 #include "Common.h"
+#include "User.h"
 
 struct Order {
   size_t user_id;
@@ -45,20 +47,30 @@ struct Order {
   bool operator>=(const Order &other) const noexcept {
     return price >= other.price;
   }
-  Order operator-(const Order &other) const {
+  Order &sub(const Order &other, bool is_buy) {
     User &this_user = database.get_user(user_id);
-    this_user.balance_rub += static_cast<double>(other.count) * price;
-    this_user.balance_usd -= static_cast<double>(other.count);
-
     User &other_user = database.get_user(other.user_id);
-    other_user.balance_rub -= static_cast<double>(other.count) * price;
-    other_user.balance_usd += static_cast<double>(other.count);
 
-    if (*this > other) {
-      return {user_id, count - other.count, price};
+    if (is_buy) {
+      this_user.balance_rub += static_cast<double>(other.count) * price;
+      this_user.balance_usd -= static_cast<double>(other.count);
+
+      other_user.balance_rub -= static_cast<double>(other.count) * price;
+      other_user.balance_usd += static_cast<double>(other.count);
     } else {
-      return {user_id, 0, 0};
+      this_user.balance_rub -= static_cast<double>(other.count) * price;
+      this_user.balance_usd += static_cast<double>(other.count);
+
+      other_user.balance_rub += static_cast<double>(other.count) * price;
+      other_user.balance_usd -= static_cast<double>(other.count);
+
     }
+    if (*this > other) {
+      this->count = count - other.count;
+    } else {
+      this->count = 0;
+    }
+    return *this;
   }
 
   [[nodiscard]] bool empty() const noexcept {

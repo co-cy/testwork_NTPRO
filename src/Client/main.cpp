@@ -6,7 +6,11 @@
 #include "Request/Request.h"
 #include "Response/Response.h"
 
+#include "User.h"
+
 int main() {
+  User user;
+
   try {
     boost::asio::io_service io_service;
 
@@ -22,7 +26,8 @@ int main() {
       std::cout << "Menu:\n"
                    "1) Registration\n"
                    "2) Auth\n"
-                   "3) Exit\n"
+                   "3) Create order\n"
+                   "4) Exit\n"
                 << std::endl;
 
       short menu_option_num;
@@ -31,37 +36,86 @@ int main() {
         std::string login;
         std::string password;
 
-        std::cin >> login >> password;
-
+        std::cout << "login: ";
+        std::cin >> login;
+        std::cout << "\npassword: ";
+        std::cin >> password;
         SendMessage(s, Request::Registration(login, password));
         auto stream = ReadMessage(s);
 
-        char type_answer;
+        char type_answer = Response::TypeInvalid;
         stream >> type_answer;
         if (type_answer == Response::TypeBoolMessage) {
           Response::BoolMessage response(stream);
-          std::cout << "Registration result: " << response.state << "\nMessage: " << response.message;
+          if (response.state) {
+            std::cout << "Registration result: " << response.state << "\nMessage: " << response.message << "\n";
+            user = User(std::stol(response.message), login, password);
+            std::cout << std::string(user) << "\n";
+          } else {
+            std::cout << "Bad. Message: " << response.message << "\n";
+          }
         } else {
-          std::cout << "Bad type answer: " << int(type_answer);
+          std::cout << "Bad type answer: " << int(type_answer) << "\n";
         }
       } else if (menu_option_num == 2) {
         std::string login;
         std::string password;
 
-        std::cin >> login >> password;
+        std::cout << "login: ";
+        std::cin >> login;
+        std::cout << "\npassword: ";
+        std::cin >> password;
 
         SendMessage(s, Request::Auth(login, password));
         auto stream = ReadMessage(s);
 
-        char type_answer;
+        char type_answer = Response::TypeInvalid;
         stream >> type_answer;
         if (type_answer == Response::TypeBoolMessage) {
           Response::BoolMessage response(stream);
-          std::cout << "Auth result: " << response.state << "\nMessage: " << response.message;
+          if (response.state) {
+            std::cout << "Auth result: " << response.state << "\nMessage: " << response.message;
+            user = User(std::stol(response.message), login, password);
+            std::cout << std::string(user) << "\n";
+          } else {
+            std::cout << "Bad. Message: " << response.message << "\n";
+          }
         } else {
           std::cout << "Bad type answer: " << int(type_answer);
         }
       } else if (menu_option_num == 3) {
+        if (user.user_id) {
+          bool is_buy;
+          size_t count;
+          double price;
+
+          std::cout << "Is buy: ";
+          std::cin >> is_buy;
+          std::cout << "\ncount: ";
+          std::cin >> count;
+          std::cout << "\nprice: ";
+          std::cin >> price;
+
+          SendMessage(s, Request::CreateOrder(user.user_id, is_buy, count, price));
+          auto stream = ReadMessage(s);
+
+          char type_answer = Response::TypeInvalid;
+          stream >> type_answer;
+          if (type_answer == Response::TypeBoolMessage) {
+            Response::BoolMessage response(stream);
+            if (response.state) {
+              std::cout << "Order result: " << response.state << "\n";
+            } else {
+              std::cout << "Bad. Message: " << response.message << "\n";
+            }
+          } else {
+            std::cout << "Bad type answer: " << int(type_answer) << "\n";
+          }
+
+        } else {
+          std::cout << "You aren't registered or auth!";
+        }
+      } else if (menu_option_num == 4) {
         exit(0);
       } else {
         std::cout << "Unknown menu option\n" << std::endl;
