@@ -136,7 +136,17 @@ void Session::handle_read(const boost::system::error_code &error, size_t bytes_t
       answer = Response::BoolMessage(false, "User not found!");
     }
   } else if (type_command == Request::TypeSellerOrders) {
+    Response::InfoSellerOrders res{};
+    for (const auto &kOrder : sell_orders) {
+      res.append(kOrder);
+    }
+    answer = std::string(res);
   } else if (type_command == Request::TypeBuyOrders) {
+    Response::InfoBuyOrders res{};
+    for (const auto &kOrder : buy_orders) {
+      res.append(kOrder);
+    }
+    answer = std::string(res);
   }
 
   boost::asio::async_write(socket_,

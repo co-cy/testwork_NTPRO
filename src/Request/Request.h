@@ -55,17 +55,15 @@ struct CreateOrder {
   bool is_buy;
   Order order;
 
-  CreateOrder(size_t userID, std::size_t count, double price) : is_buy(true), order(userID, count, price) {}
-  CreateOrder(bool is_buy, size_t userID, std::size_t count, double price)
-      : is_buy(is_buy), order(userID, count, price) {}
+  CreateOrder(size_t user_id, std::size_t count, double price) : is_buy(true), order(user_id, count, price) {}
+  CreateOrder(size_t user_id, bool is_buy, std::size_t count, double price)
+      : is_buy(is_buy), order(user_id, count, price) {}
   explicit CreateOrder(std::istringstream &stream) : is_buy(true) {
-    stream >> order.user_id >> is_buy >> order.count >> order.price;
+    stream >> is_buy >> order.user_id >> order.count >> order.price;
   }
 
   operator std::string() const {
-    return std::string(1, TypeCreateOrder) + " " + std::to_string(order.user_id) + " " + std::to_string(is_buy) + " "
-        + std::to_string(order.count) + " "
-        + std::to_string(order.price);
+    return std::string(1, TypeCreateOrder) + " " + std::to_string(is_buy) + " " + std::string(order);
   }
 };
 

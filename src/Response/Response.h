@@ -5,9 +5,12 @@
 #ifndef TESTWORK_NTPRO_SRC_RESPONSE_RESPONSE_H_
 #define TESTWORK_NTPRO_SRC_RESPONSE_RESPONSE_H_
 
-#include <string>
 #include <sstream>
+#include <string>
+#include <vector>
+#include <set>
 
+#include "Order.h"
 #include "User.h"
 
 namespace Response {
@@ -16,6 +19,8 @@ enum TypeRequest : char {
   TypeInvalid = 0,
   TypeBoolMessage = 1,
   TypeInfoUser,
+  TypeInfoSellerOrders,
+  TypeInfoBuyOrders,
 
 };
 
@@ -51,6 +56,56 @@ struct InfoUser {
   operator std::string() const {
     return std::string(1, TypeInfoUser) + " " + std::to_string(user_id) + " " + login + " "
         + std::to_string(balance_rub) + " " + std::to_string(balance_usd);
+  }
+};
+
+struct InfoSellerOrders {
+  size_t count_orders;
+  std::vector<Order> orders;
+
+  InfoSellerOrders() : count_orders(0) {}
+  explicit InfoSellerOrders(std::istringstream &stream) : count_orders(0) {
+    stream >> count_orders;
+    for (int i = 0; i < count_orders; ++i)
+      orders.emplace_back(stream);
+  };
+
+  void append(const Order &order) {
+    orders.push_back(order);
+    ++count_orders;
+  }
+
+  operator std::string() const {
+    std::string tmp;
+    for (const auto &order : orders) {
+      tmp += " " + std::string(order);
+    }
+    return std::string(1, TypeInfoSellerOrders) + " " + std::to_string(count_orders) + " " + tmp;
+  }
+};
+
+struct InfoBuyOrders {
+  size_t count_orders;
+  std::vector<Order> orders;
+
+  InfoBuyOrders() : count_orders(0) {}
+  explicit InfoBuyOrders(std::istringstream &stream) : count_orders(0) {
+    stream >> count_orders;
+    for (int i = 0; i < count_orders; ++i)
+      orders.emplace_back(stream);
+  };
+
+  void append(const Order &order) {
+    orders.push_back(order);
+    ++count_orders;
+  }
+
+  operator std::string() const {
+    std::string tmp;
+    for (const auto &order : orders) {
+      tmp += " " + std::string(order);
+    }
+    return std::string(1, TypeInfoBuyOrders) + " " + std::to_string(count_orders) + " " + tmp;
   }
 };
 

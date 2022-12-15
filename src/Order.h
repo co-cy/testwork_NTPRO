@@ -6,6 +6,7 @@
 #define TESTWORK_NTPRO_SRC_ORDER_H_
 
 #include <stdexcept>
+#include <sstream>
 #include <queue>
 #include <vector>
 #include <set>
@@ -22,11 +23,14 @@ struct Order {
 
   Order() : user_id(0), count(0), price(0) {}
 
-  Order(size_t userID, size_t count, double price) : user_id(userID), count(count), price(price) {
+  Order(size_t user_id, size_t count, double price) : user_id(user_id), count(count), price(price) {
     if (price <= 0)
       throw std::logic_error("Price can't <= 0");
     if (count == 0)
       throw std::logic_error("Count can't = 0");
+  }
+  explicit Order(std::istringstream &stream) : user_id(0), count(0), price(0) {
+    stream >> user_id >> count >> price;
   }
 
   bool operator>(const Order &other) const noexcept {
@@ -75,6 +79,10 @@ struct Order {
 
   [[nodiscard]] bool empty() const noexcept {
     return !count;
+  }
+
+  operator std::string() const {
+    return std::to_string(user_id) + " " + std::to_string(count) + " " + std::to_string(price);
   }
 };
 
