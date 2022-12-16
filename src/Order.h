@@ -86,7 +86,7 @@ struct Order {
   }
 };
 
-std::multiset<Order, std::greater<>> sell_orders{};
-std::multiset<Order> buy_orders{};
+static std::multiset<Order, std::greater<>> sell_orders{};
+static std::multiset<Order> buy_orders{};
 
 #endif //TESTWORK_NTPRO_SRC_ORDER_H_
