@@ -77,6 +77,8 @@ void Session::handle_read(const boost::system::error_code &error, size_t bytes_t
     if (order.is_buy) {
       for (auto iter = sell_orders.begin(); iter != sell_orders.end() && !order.order.empty();) {
         if (iter->user_id != order.order.user_id) {
+          if (iter->price > order.order.price) break;
+
           if (*iter > order.order) {
             auto half_order = sell_orders.extract(iter).value();
             half_order.sub(order.order, order.is_buy);
@@ -95,6 +97,8 @@ void Session::handle_read(const boost::system::error_code &error, size_t bytes_t
     } else {
       for (auto iter = buy_orders.begin(); iter != buy_orders.end() && !order.order.empty();) {
         if (iter->user_id != order.order.user_id) {
+          if (iter->price < order.order.price) break;
+
           if (*iter > order.order) {
             auto half_order = buy_orders.extract(iter).value();
             half_order.sub(order.order, order.is_buy);
