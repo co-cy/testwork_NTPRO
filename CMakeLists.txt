@@ -25,7 +25,11 @@ set(CLIENT_SOURCES
         src/Client/auth.ui
         src/Client/main.cpp
         src/Client/Helpers.cpp
-        src/Client/Helpers.h)
+        src/Client/Helpers.h
+        src/Client/trade.cpp
+        src/Client/trade.h
+        src/Client/trade.ui
+        )
 
 add_executable(ClientOld
         ${SHARED_FILES}

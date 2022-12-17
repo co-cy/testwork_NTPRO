@@ -5,6 +5,7 @@
 #include <QMainWindow>
 
 #include "User.h"
+#include "trade.h"
 
 using boost::asio::ip::tcp;
 
@@ -24,6 +25,7 @@ class Auth : public QMainWindow {
   User user;
   boost::asio::io_service io_service{};
   tcp::socket sock{io_service};
+  Trade *trade;
 
  public slots:
   void authorization();

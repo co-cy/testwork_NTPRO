@@ -12,7 +12,7 @@
 #include "Common.h"
 
 Auth::Auth(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::Auth) {
+    : QMainWindow(parent), ui(new Ui::Auth), trade(nullptr) {
   ui->setupUi(this);
 
   connect(ui->button, &QPushButton::released, this, &Auth::authorization);
@@ -25,6 +25,7 @@ Auth::Auth(QWidget *parent)
 }
 
 Auth::~Auth() {
+  delete trade;
   delete ui;
 }
 
@@ -46,7 +47,12 @@ void Auth::authorization() {
     Response::BoolMessage res{stream};
     if (res.state) {
       user = User(std::stol(res.message), ui->login->text().toStdString(), ui->password->text().toStdString());
-      ui->errorsLabel->setText(QString::fromStdString(std::string(user)));
+
+      hide();
+      delete trade;
+
+      trade = new Trade(this, user, &sock);
+      trade->show();
     } else {
       ui->errorsLabel->setText(QString::fromStdString(res.message));
     }

@@ -34,19 +34,6 @@ void Session::handle_read(const boost::system::error_code &error, size_t bytes_t
 
   char type_command;
   iss >> type_command;
-
-  std::cout << "Sell size: " << sell_orders.size() << "\n";
-  for (const auto &sell_order : sell_orders) {
-    std::cout << "Sell order: " << std::to_string(sell_order.user_id) << " " << std::to_string(sell_order.count) << " "
-              << std::to_string(sell_order.price) << " " << "\n";
-  }
-
-  std::cout << "Buy size: " << buy_orders.size() << "\n";
-  for (const auto &buy_order : buy_orders) {
-    std::cout << "Buy order: " << std::to_string(buy_order.user_id) << " " << std::to_string(buy_order.count) << " "
-              << std::to_string(buy_order.price) << " " << "\n";
-  }
-
   std::string answer = std::to_string(Response::TypeInvalid);
 
   if (type_command == Request::TypeRegistration) {
