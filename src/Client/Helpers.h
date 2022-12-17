@@ -1,0 +1,24 @@
+//
+// Created by co_cy on 17.12.22.
+//
+
+#ifndef TESTWORK_NTPRO_SRC_CLIENT_HELPERS_H_
+#define TESTWORK_NTPRO_SRC_CLIENT_HELPERS_H_
+
+#include <iostream>
+#include <boost/asio.hpp>
+#include <sstream>
+
+#include "Common.h"
+
+using boost::asio::ip::tcp;
+
+// Отправка сообщения на сервер по шаблону.
+void SendMessage(
+    tcp::socket &aSocket,
+    const std::string &message);
+
+// Возвращает строку с ответом сервера на последний запрос.
+std::istringstream ReadMessage(tcp::socket &aSocket);
+
+#endif //TESTWORK_NTPRO_SRC_CLIENT_HELPERS_H_

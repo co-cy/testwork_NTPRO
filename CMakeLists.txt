@@ -20,11 +20,12 @@ set(SHARED_FILES
         src/User.h)
 
 set(CLIENT_SOURCES
-        src/Client/Auth/auth.h
-        src/Client/Auth/auth.cpp
-        src/Client/Auth/auth.ui
-        src/Client/Auth/main.cpp
-        )
+        src/Client/auth.h
+        src/Client/auth.cpp
+        src/Client/auth.ui
+        src/Client/main.cpp
+        src/Client/Helpers.cpp
+        src/Client/Helpers.h)
 
 add_executable(ClientOld
         ${SHARED_FILES}

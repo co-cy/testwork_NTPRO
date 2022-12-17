@@ -7,6 +7,7 @@
 
 #include <string>
 #include <sstream>
+#include <utility>
 #include "Common.h"
 #include "Order.h"
 
@@ -25,7 +26,7 @@ struct Registration {
   std::string login;
   std::string password;
 
-  Registration(std::string &login, std::string &password) : login(login), password(password) {}
+  Registration(std::string login, std::string password) : login(std::move(login)), password(std::move(password)) {}
 
   explicit Registration(std::istringstream &stream) {
     stream >> login >> password;
@@ -40,7 +41,7 @@ struct Auth {
   std::string login;
   std::string password;
 
-  Auth(std::string &login, std::string &password) : login(login), password(password) {}
+  Auth(std::string login, std::string password) : login(std::move(login)), password(std::move(password)) {}
 
   explicit Auth(std::istringstream &stream) {
     stream >> login >> password;
